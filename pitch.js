@@ -1,8 +1,9 @@
 const SLIDES={
  it:[
   ['🍽️','Cosa <em>mangio</em>?','Ogni giorno, la stessa domanda. Ogni giorno, la stessa fatica.'],
-  ['😮‍💨','Il problema','<ul><li>🧠 Decidere ogni sera stanca: è la "decision fatigue".</li><li>🗑️ Lo spreco alimentare domestico è enorme (cifre da verificare prima dell\'orale).</li><li>📖 Le app di ricette sono cataloghi: si cerca, si scorre, non si decide.</li></ul>'],
-  ['✨','La soluzione','<p>Un\'app che <b>decide per te</b> in 10 secondi.<br>Frigo + tempo + budget → 3 idee → uno swipe → lista della spesa automatica.</p>'],
+  ['😮‍💨','Il problema','<ul><li>🧠 Decidere ogni sera stanca: è la "decision fatigue".</li><li>🗑️ Le famiglie europee buttano ogni anno decine di chili di cibo: è oltre la metà dello spreco alimentare totale.</li><li>📖 Le app di ricette sono cataloghi: si cerca, si scorre, non si decide.</li></ul>'],
+  ['📊','I numeri dello spreco','<ul><li>🇪🇺 UE (2023): 58 milioni di tonnellate, ≈ 130 kg a persona. Il 53% viene dalle famiglie: ≈ 69 kg a persona.</li><li>🇮🇹 Italia: ≈ 555 g di cibo buttato a persona ogni settimana (≈ 29 kg l\'anno), circa 7-8 miliardi di € l\'anno nelle case.</li><li>🇫🇷 Francia: ≈ 20-30 kg a persona l\'anno nelle case, circa 150 € a persona.</li><li style="font-size:.7em;opacity:.7">Fonti: Eurostat (2025), Osservatorio Waste Watcher (2025), ADEME. Ordini di grandezza: i dati variano secondo gli anni e i metodi.</li></ul>'],
+  ['✨','La soluzione','<p>Un\'app che <b>decide per te</b> in 10 secondi.<br>Frigo + tempo + budget → 3 idee → uno swipe → lista della spesa automatica.<br>🟠 Gli ingredienti da finire passano avanti: <b>meno spreco</b>.</p>'],
   ['👆','Demo dal vivo','<p>Apriamo l\'app. Cambiamo i filtri, svuotiamo il frigo, scorriamo, e guardiamo la spesa riempirsi da sola.</p>'],
   ['🔁','Perché diventa un\'abitudine','<ul><li>⏰ Notifica alle 17:30, l\'ora in cui ci si chiede cosa cucinare</li><li>⚡ Meno di 10 secondi per uso</li><li>🧠 Impara i tuoi gusti ad ogni swipe</li></ul>'],
   ['💶','Come guadagna','<ul><li>🛒 Partnership con i supermercati (consegna della spesa, commissione)</li><li>⭐ Abbonamento Premium: famiglia, intolleranze, menu settimanale</li><li>🏷️ Offerte del volantino mirate sulle ricette scelte</li></ul>'],
@@ -10,8 +11,9 @@ const SLIDES={
  ],
  fr:[
   ['🍽️','Cosa <em>mangio</em>?','Chaque jour, la même question. Chaque jour, la même corvée.'],
-  ['😮‍💨','Le problème','<ul><li>🧠 Décider chaque soir fatigue : c\'est la « fatigue décisionnelle ».</li><li>🗑️ Le gaspillage alimentaire des ménages est énorme (chiffres à vérifier avant l\'oral).</li><li>📖 Les apps de recettes sont des catalogues : on cherche, on scrolle, on ne décide pas.</li></ul>'],
-  ['✨','La solution','<p>Une app qui <b>décide pour toi</b> en 10 secondes.<br>Frigo + temps + budget → 3 idées → un swipe → liste de courses automatique.</p>'],
+  ['😮‍💨','Le problème','<ul><li>🧠 Décider chaque soir fatigue : c\'est la « fatigue décisionnelle ».</li><li>🗑️ Les ménages européens jettent chaque année des dizaines de kilos de nourriture : plus de la moitié du gaspillage alimentaire total.</li><li>📖 Les apps de recettes sont des catalogues : on cherche, on scrolle, on ne décide pas.</li></ul>'],
+  ['📊','Les chiffres du gaspillage','<ul><li>🇪🇺 UE (2023) : 58 millions de tonnes, ≈ 130 kg par habitant. 53 % viennent des ménages : ≈ 69 kg par habitant.</li><li>🇮🇹 Italie : ≈ 555 g de nourriture jetée par personne et par semaine (≈ 29 kg par an), soit environ 7 à 8 milliards d\'€ par an dans les foyers.</li><li>🇫🇷 France : ≈ 20 à 30 kg par personne et par an à la maison, soit environ 150 € par personne.</li><li style="font-size:.7em;opacity:.7">Sources : Eurostat (2025), Osservatorio Waste Watcher (2025), ADEME. Ordres de grandeur : les chiffres varient selon les années et les méthodes.</li></ul>'],
+  ['✨','La solution','<p>Une app qui <b>décide pour toi</b> en 10 secondes.<br>Frigo + temps + budget → 3 idées → un swipe → liste de courses automatique.<br>🟠 Les ingrédients à finir passent en premier : <b>moins de gaspillage</b>.</p>'],
   ['👆','Démo en direct','<p>On ouvre l\'app. On change les filtres, on vide le frigo, on swipe, et on regarde la liste de courses se remplir toute seule.</p>'],
   ['🔁','Pourquoi ça devient une habitude','<ul><li>⏰ Notification à 17h30, l\'heure où on se demande quoi cuisiner</li><li>⚡ Moins de 10 secondes par usage</li><li>🧠 Elle apprend tes goûts à chaque swipe</li></ul>'],
   ['💶','Comment elle gagne de l\'argent','<ul><li>🛒 Partenariats supermarchés (livraison des courses, commission)</li><li>⭐ Abonnement Premium : famille, intolérances, menu de la semaine</li><li>🏷️ Promos de prospectus ciblées sur les recettes choisies</li></ul>'],

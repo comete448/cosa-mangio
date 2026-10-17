@@ -1,13 +1,13 @@
 const TXT = {
- it:{person:'persona',themeAuto:'Tema: automatico',themeLight:'Tema: chiaro',themeDark:'Tema: scuro',ingr:'Ingredienti',tonight:'Stasera',menu:'Menu',fridge:'Frigo',list:'Spesa',title:'Cosa mangio stasera?',sub:'Scorri: ♥ lo faccio, ✕ un\'altra idea',min:'min',
-   empty:'Hai visto tutte le idee',again:'Ricomincia',fridgeT:'Cosa hai in casa?',fridgeS:'Tocca gli ingredienti che hai. Le proposte si aggiornano.',
+ it:{urgentTag:'Da finire',undo:'Annulla',person:'persona',themeAuto:'Tema: automatico',themeLight:'Tema: chiaro',themeDark:'Tema: scuro',ingr:'Ingredienti',tonight:'Stasera',menu:'Menu',fridge:'Frigo',list:'Spesa',title:'Cosa mangio stasera?',sub:'Scorri: ♥ lo faccio, ✕ un\'altra idea',min:'min',
+   empty:'Hai visto tutte le idee',again:'Ricomincia',fridgeT:'Cosa hai in casa?',fridgeS:'Tocca = ce l\'hai. Tocca ancora = da consumare presto 🟠: le ricette che lo usano passano avanti.',
    listT:'Lista della spesa',listS:'Si riempie da sola. Spunta = lo hai comprato → entra nel frigo.',listE:'Niente da comprare 👌',cook:'Ottimo, si cucina!',added:'aggiunti alla spesa',
    perPerson:'a persona',nothing:'Nessuna ricetta con questi filtri. Allarga il budget o il tempo.',pitch:'Pitch',noMiss:'hai già tutto!',steps:'Come si fa',veg:'Vegetariano',
    menuT:'Il tuo menu',menuS:'Le ricette che hai scelto. Toccane una per vedere come si fa.',menuE:'Nessuna ricetta scelta. Vai su Stasera e scorri a destra ♥',
    missing:'da comprare',cooked:'✓ Cucinato',remove:'Rimuovi dal menu',close:'Chiudi',persons:'persone',addPh:'Aggiungi un articolo…',addB:'Aggiungi',
    clearDone:'Svuota comprati',share:'Condividi',copied:'Lista copiata 📋',install:'Installa',other:'Altro',reset:'Azzera tutto',resetQ:'Cancellare menu, frigo e lista?'},
- fr:{person:'personne',themeAuto:'Thème : automatique',themeLight:'Thème : clair',themeDark:'Thème : sombre',ingr:'Ingrédients',tonight:'Ce soir',menu:'Menu',fridge:'Frigo',list:'Courses',title:'On mange quoi ce soir ?',sub:'Swipe : ♥ je le fais, ✕ autre idée',min:'min',
-   empty:'Tu as vu toutes les idées',again:'Recommencer',fridgeT:'Qu\'as-tu à la maison ?',fridgeS:'Touche les ingrédients que tu as. Les idées se mettent à jour.',
+ fr:{urgentTag:'À finir',undo:'Annuler',person:'personne',themeAuto:'Thème : automatique',themeLight:'Thème : clair',themeDark:'Thème : sombre',ingr:'Ingrédients',tonight:'Ce soir',menu:'Menu',fridge:'Frigo',list:'Courses',title:'On mange quoi ce soir ?',sub:'Swipe : ♥ je le fais, ✕ autre idée',min:'min',
+   empty:'Tu as vu toutes les idées',again:'Recommencer',fridgeT:'Qu\'as-tu à la maison ?',fridgeS:'Touche = tu l\'as. Touche encore = à consommer vite 🟠 : les recettes qui l\'utilisent passent en premier.',
    listT:'Liste de courses',listS:'Elle se remplit toute seule. Coche = acheté → ça entre dans le frigo.',listE:'Rien à acheter 👌',cook:'Super, on cuisine !',added:'ajoutés aux courses',
    perPerson:'par personne',nothing:'Aucune recette avec ces filtres. Élargis le budget ou le temps.',pitch:'Pitch',noMiss:'tu as déjà tout !',steps:'Comment faire',veg:'Végétarien',
    menuT:'Ton menu',menuS:'Les recettes que tu as choisies. Touche-en une pour voir comment faire.',menuE:'Aucune recette choisie. Va sur Ce soir et swipe à droite ♥',
@@ -16,11 +16,12 @@ const TXT = {
 };
 
 const KEY='cosamangio.v2', OLDKEY='cosamangio.v1';
-const DEFAULTS=()=>({theme:'auto',lang:'it',tab:'tonight',fridge:['pasta','uova','pomodoro','zucchine','parmigiano'],time:30,budget:4,veg:false,persons:2,skipped:[],menu:[],list:[]});
+const DEFAULTS=()=>({theme:'auto',lang:'it',tab:'tonight',fridge:['pasta','uova','pomodoro','zucchine','parmigiano'],time:30,budget:4,veg:false,persons:2,skipped:[],menu:[],list:[],urgent:[],last:null});
 let S=DEFAULTS();
 try{const x=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(OLDKEY)||'null'); if(x) S=Object.assign(S,x);}catch(e){}
 S.menu=S.menu.filter(id=>RMAP[id]);
 S.list=S.list.filter(x=>x.c||ING[x.k]);
+S.urgent=(S.urgent||[]).filter(k=>ING[k]&&S.fridge.includes(k));
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const L=()=>S.lang==='fr'?1:0;
 const t=k=>TXT[S.lang][k];
@@ -43,9 +44,10 @@ function need(k){
 // ---- logique ----
 function deck(){
   return R.filter(r=>r.t<=S.time && r.c<=S.budget && (!S.veg||r.v) && !S.skipped.includes(r.id) && !S.menu.includes(r.id))
-    .map(r=>({r,have:r.i.filter(a=>S.fridge.includes(a[0])).length/r.i.length}))
-    .sort((a,b)=>b.have-a.have||a.r.t-b.r.t).map(x=>x.r);
+    .map(r=>({r,urg:urgentIn(r).length,have:r.i.filter(a=>S.fridge.includes(a[0])).length/r.i.length}))
+    .sort((a,b)=>b.urg-a.urg||b.have-a.have||a.r.t-b.r.t).map(x=>x.r);
 }
+function urgentIn(r){return r.i.map(a=>a[0]).filter(k=>S.urgent.includes(k))}
 function missing(r){return r.i.map(a=>a[0]).filter(k=>!S.fridge.includes(k))}
 function addToMenu(r){
   if(S.menu.includes(r.id)) return 0;
@@ -63,11 +65,19 @@ function toggleBought(i){
   const it=S.list[i]; it.done=!it.done;
   if(!it.k) return;
   if(it.done){ if(!S.fridge.includes(it.k)) S.fridge.push(it.k); }
-  else S.fridge=S.fridge.filter(k=>k!==it.k);
+  else { S.fridge=S.fridge.filter(k=>k!==it.k); S.urgent=S.urgent.filter(k=>k!==it.k); }
 }
+// Cycle : absent -> au frigo -> à finir vite -> absent
 function toggleFridge(k){
-  if(S.fridge.includes(k)) S.fridge=S.fridge.filter(x=>x!==k);
-  else { S.fridge.push(k); S.list.forEach(x=>{if(x.k===k)x.done=true}); }
+  if(!S.fridge.includes(k)){ S.fridge.push(k); S.list.forEach(x=>{if(x.k===k)x.done=true}); }
+  else if(!S.urgent.includes(k)) S.urgent.push(k);
+  else { S.urgent=S.urgent.filter(x=>x!==k); S.fridge=S.fridge.filter(x=>x!==k); }
+}
+function undo(){
+  const l=S.last; if(!l) return;
+  if(l.kind==='skip') S.skipped=S.skipped.filter(id=>id!==l.id);
+  else if(l.kind==='menu') removeFromMenu(l.id);
+  S.last=null;
 }
 function listText(){
   return S.list.filter(x=>!x.done).map(x=>'• '+(x.c?x.c:ING[x.k][2]+' '+ing(x.k)+(need(x.k)?' ('+need(x.k)+')':''))).join('\n');
@@ -98,7 +108,7 @@ const hue=r=>`--h:${(r.id*47+12)%360}`;
 
 // ---- vues ----
 function ingredients(r,qty){
-  return r.i.map(([k,q,u])=>`<span class="ing ${S.fridge.includes(k)?'have':'miss'}">${ING[k][2]} ${ing(k)}${qty?' · '+fq(q*S.persons,u):''}</span>`).join('');
+  return r.i.map(([k,q,u])=>`<span class="ing ${S.urgent.includes(k)?'urg':S.fridge.includes(k)?'have':'miss'}">${ING[k][2]} ${ing(k)}${qty?' · '+fq(q*S.persons,u):''}</span>`).join('');
 }
 function applyTheme(){
   const el=document.documentElement;
@@ -135,10 +145,11 @@ function viewTonight(){
       return `<div class="rc ${i===1?'back1':i===2?'back2':''}" data-top="${i===0?1:0}" data-id="${r.id}" style="${hue(r)}">
         <div class="stamp y">${S.lang==='it'?'LO FACCIO':'JE LE FAIS'}</div><div class="stamp n">${S.lang==='it'?'PASSO':'SUIVANT'}</div>
         <div class="hero"><div class="plate">${r.e}</div></div>
+        ${urgentIn(r).length?`<div class="urgtag">⏳ ${t('urgentTag')} : ${urgentIn(r).map(ing).join(', ')}</div>`:''}
         <div class="body"><h3>${r.n[L()]}</h3>
         <div class="meta"><span>${ICON.clock}${r.t} ${t('min')}</span><span>${ICON.euro}~${r.c} € ${t('perPerson')}</span></div>
         <div class="ings">${ingredients(r)}</div></div></div>`}).join('')+`</div>
-      <div class="actions"><button class="round no" data-a="no" aria-label="${S.lang==='fr'?'Non':'No'}">${ICON.x}</button><button class="round yes" data-a="yes" aria-label="${S.lang==='fr'?'Oui':'Sì'}">${ICON.heart}</button></div>`;
+      <div class="actions"><button class="round no" data-a="no" aria-label="${S.lang==='fr'?'Non':'No'}">${ICON.x}</button>${S.last?`<button class="round sm" data-a="undo" aria-label="${t('undo')}" title="${t('undo')}">↶</button>`:''}<button class="round yes" data-a="yes" aria-label="${S.lang==='fr'?'Oui':'Sì'}">${ICON.heart}</button></div>`;
   }
   return `<h2>${t('title')}</h2><p class="sub">${t('sub')}</p>
     <div class="filters">
@@ -156,7 +167,7 @@ function viewMenu(){
 function viewFridge(){
   return `<h2>${t('fridgeT')}</h2><p class="sub">${t('fridgeS')}</p>`+
    ['base','veg','lat','car'].map(c=>`<div class="cat">${CATS[c][L()]}</div><div class="grid">`+
-     Object.keys(ING).filter(k=>ING[k][3]===c).map(k=>`<span class="chip ${S.fridge.includes(k)?'on':''}" data-a="fr" data-v="${k}">${ING[k][2]} ${ing(k)}</span>`).join('')+`</div>`).join('');
+     Object.keys(ING).filter(k=>ING[k][3]===c).map(k=>`<span class="chip ${S.urgent.includes(k)?'urg':S.fridge.includes(k)?'on':''}" data-a="fr" data-v="${k}">${ING[k][2]} ${ing(k)}</span>`).join('')+`</div>`).join('');
 }
 function viewList(){
   let out=`<h2>${t('listT')}</h2><p class="sub">${t('listS')}</p>
@@ -197,7 +208,7 @@ function decide(yes){
   el.classList.remove('drag'); el.style.transform=`translateX(${yes?500:-500}px) rotate(${yes?25:-25}deg)`; el.style.opacity=0;
   setTimeout(()=>{
     let n=0;
-    if(yes) n=addToMenu(r); else S.skipped.push(r.id);
+    if(yes){ n=addToMenu(r); S.last={kind:'menu',id:r.id}; } else { S.skipped.push(r.id); S.last={kind:'skip',id:r.id}; }
     save(); render();
     if(yes) recipeSheet(r,n,false);
   },180);
@@ -228,7 +239,8 @@ document.addEventListener('click',e=>{
   else if(a==='buy'){toggleBought(+v)}
   else if(a==='yes'){return decide(true)}
   else if(a==='no'){return decide(false)}
-  else if(a==='reset'){S.skipped=[]}
+  else if(a==='reset'){S.skipped=[]; S.last=null}
+  else if(a==='undo'){undo()}
   else if(a==='open'){return recipeSheet(RMAP[+v],0,true)}
   else if(a==='cooked'||a==='unmenu'){removeFromMenu(+v)}
   else if(a==='clearDone'){S.list=S.list.filter(x=>!x.done)}
