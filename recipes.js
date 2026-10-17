@@ -10,7 +10,7 @@ const ING = {
   piselli:['piselli','petits pois','🟢','veg'], basilico:['basilico','basilic','🌿','veg'], limone:['limone','citron','🍋','veg'],
   uova:['uova','œufs','🥚','lat'], mozzarella:['mozzarella','mozzarella','🧀','lat'], parmigiano:['parmigiano','parmesan','🧀','lat'],
   pecorino:['pecorino','pecorino','🧀','lat'], ricotta:['ricotta','ricotta','🥛','lat'], burro:['burro','beurre','🧈','lat'],
-  pollo:['pollo','poulet','🍗','car'], tonno:['tonno','thon','🐟','car'], guanciale:['guanciale','guanciale','🥓','car'],
+  pollo:['pollo','poulet','🍗','car'], tonno:['tonno','thon','🐟','car'], guanciale:['guanciale','lardons','🥓','car'],
   salsiccia:['salsiccia','saucisse','🌭','car'], macinato:['carne macinata','viande hachée','🥩','car'], prosciutto:['prosciutto','jambon','🍖','car']
 };
 const CATS = {
@@ -25,7 +25,7 @@ const R = [
  {id:1,e:'🍝',n:['Spaghetti al pomodoro','Spaghetti à la tomate'],t:15,c:2,v:1,i:[['pasta',80,'g'],['pomodoro',150,'g'],['aglio',1,'pz'],['basilico',5,'g']],
   s:['Fai soffriggere l\'aglio, aggiungi i pomodori e cuoci 10 minuti. Condisci la pasta con basilico fresco.','Fais revenir l\'ail, ajoute les tomates et cuis 10 minutes. Mélange avec les pâtes et le basilic frais.']},
  {id:2,e:'🥓',n:['Carbonara','Carbonara'],t:20,c:4,v:0,i:[['pasta',80,'g'],['uova',1,'pz'],['guanciale',40,'g'],['pecorino',20,'g'],['pepe',1,'g']],
-  s:['Rosola il guanciale, mescola uova e pecorino fuori dal fuoco con la pasta calda. Niente panna!','Fais dorer le guanciale, mélange œufs et pecorino hors du feu avec les pâtes chaudes. Pas de crème !']},
+  s:['Rosola il guanciale, mescola uova e pecorino fuori dal fuoco con la pasta calda. Niente panna!','Fais dorer les lardons, mélange œufs et pecorino hors du feu avec les pâtes chaudes. Pas de crème !']},
  {id:3,e:'🍄',n:['Risotto ai funghi','Risotto aux champignons'],t:30,c:4,v:1,i:[['riso',80,'g'],['funghi',100,'g'],['cipolla',30,'g'],['parmigiano',20,'g']],
   s:['Soffriggi la cipolla, tosta il riso, aggiungi brodo poco alla volta. Manteca con parmigiano.','Fais revenir l\'oignon, nacre le riz, ajoute le bouillon louche par louche. Finis avec du parmesan.']},
  {id:4,e:'🫘',n:['Pasta e ceci','Pâtes aux pois chiches'],t:30,c:2,v:1,i:[['pasta',60,'g'],['ceci',100,'g'],['aglio',1,'pz'],['pomodoro',80,'g']],

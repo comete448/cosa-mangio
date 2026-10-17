@@ -138,7 +138,7 @@ function viewTonight(){
         <div class="body"><h3>${r.n[L()]}</h3>
         <div class="meta"><span>${ICON.clock}${r.t} ${t('min')}</span><span>${ICON.euro}~${r.c} € ${t('perPerson')}</span></div>
         <div class="ings">${ingredients(r)}</div></div></div>`}).join('')+`</div>
-      <div class="actions"><button class="round no" data-a="no" aria-label="No">${ICON.x}</button><button class="round yes" data-a="yes" aria-label="Sì">${ICON.heart}</button></div>`;
+      <div class="actions"><button class="round no" data-a="no" aria-label="${S.lang==='fr'?'Non':'No'}">${ICON.x}</button><button class="round yes" data-a="yes" aria-label="${S.lang==='fr'?'Oui':'Sì'}">${ICON.heart}</button></div>`;
   }
   return `<h2>${t('title')}</h2><p class="sub">${t('sub')}</p>
     <div class="filters">
