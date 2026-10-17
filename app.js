@@ -1,18 +1,18 @@
 const TXT = {
- it:{tonight:'Stasera',menu:'Menu',fridge:'Frigo',list:'Spesa',title:'Cosa mangio stasera?',sub:'Scorri: ♥ lo faccio, ✕ un\'altra idea',min:'min',
-   empty:'Hai visto tutte le idee 🎉',again:'Ricomincia',fridgeT:'Cosa hai in casa?',fridgeS:'Tocca gli ingredienti che hai. Le proposte si aggiornano.',
+ it:{ingr:'Ingredienti',tonight:'Stasera',menu:'Menu',fridge:'Frigo',list:'Spesa',title:'Cosa mangio stasera?',sub:'Scorri: ♥ lo faccio, ✕ un\'altra idea',min:'min',
+   empty:'Hai visto tutte le idee',again:'Ricomincia',fridgeT:'Cosa hai in casa?',fridgeS:'Tocca gli ingredienti che hai. Le proposte si aggiornano.',
    listT:'Lista della spesa',listS:'Si riempie da sola. Spunta = lo hai comprato → entra nel frigo.',listE:'Niente da comprare 👌',cook:'Ottimo, si cucina!',added:'aggiunti alla spesa',
    perPerson:'a persona',nothing:'Nessuna ricetta con questi filtri. Allarga il budget o il tempo.',pitch:'Pitch',noMiss:'hai già tutto!',steps:'Come si fa',veg:'Vegetariano',
    menuT:'Il tuo menu',menuS:'Le ricette che hai scelto. Toccane una per vedere come si fa.',menuE:'Nessuna ricetta scelta. Vai su Stasera e scorri a destra ♥',
    missing:'da comprare',cooked:'✓ Cucinato',remove:'Rimuovi dal menu',close:'Chiudi',persons:'persone',addPh:'Aggiungi un articolo…',addB:'Aggiungi',
-   clearDone:'Svuota comprati',share:'Condividi',copied:'Lista copiata 📋',install:'📲 Installa',other:'Altro',reset:'Azzera tutto',resetQ:'Cancellare menu, frigo e lista?'},
- fr:{tonight:'Ce soir',menu:'Menu',fridge:'Frigo',list:'Courses',title:'On mange quoi ce soir ?',sub:'Swipe : ♥ je le fais, ✕ autre idée',min:'min',
-   empty:'Tu as vu toutes les idées 🎉',again:'Recommencer',fridgeT:'Qu\'as-tu à la maison ?',fridgeS:'Touche les ingrédients que tu as. Les idées se mettent à jour.',
+   clearDone:'Svuota comprati',share:'Condividi',copied:'Lista copiata 📋',install:'Installa',other:'Altro',reset:'Azzera tutto',resetQ:'Cancellare menu, frigo e lista?'},
+ fr:{ingr:'Ingrédients',tonight:'Ce soir',menu:'Menu',fridge:'Frigo',list:'Courses',title:'On mange quoi ce soir ?',sub:'Swipe : ♥ je le fais, ✕ autre idée',min:'min',
+   empty:'Tu as vu toutes les idées',again:'Recommencer',fridgeT:'Qu\'as-tu à la maison ?',fridgeS:'Touche les ingrédients que tu as. Les idées se mettent à jour.',
    listT:'Liste de courses',listS:'Elle se remplit toute seule. Coche = acheté → ça entre dans le frigo.',listE:'Rien à acheter 👌',cook:'Super, on cuisine !',added:'ajoutés aux courses',
    perPerson:'par personne',nothing:'Aucune recette avec ces filtres. Élargis le budget ou le temps.',pitch:'Pitch',noMiss:'tu as déjà tout !',steps:'Comment faire',veg:'Végétarien',
    menuT:'Ton menu',menuS:'Les recettes que tu as choisies. Touche-en une pour voir comment faire.',menuE:'Aucune recette choisie. Va sur Ce soir et swipe à droite ♥',
    missing:'à acheter',cooked:'✓ Cuisiné',remove:'Retirer du menu',close:'Fermer',persons:'personnes',addPh:'Ajouter un article…',addB:'Ajouter',
-   clearDone:'Vider les achetés',share:'Partager',copied:'Liste copiée 📋',install:'📲 Installer',other:'Autre',reset:'Tout remettre à zéro',resetQ:'Effacer menu, frigo et liste ?'}
+   clearDone:'Vider les achetés',share:'Partager',copied:'Liste copiée 📋',install:'Installer',other:'Autre',reset:'Tout remettre à zéro',resetQ:'Effacer menu, frigo et liste ?'}
 };
 
 const KEY='cosamangio.v2', OLDKEY='cosamangio.v1';
@@ -77,6 +77,22 @@ function toast(msg){
   setTimeout(()=>d.remove(),1800);
 }
 
+// ---- icônes ----
+const svg=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+const ICON={
+  tonight:svg('<path d="M7 3v7a2.5 2.5 0 0 0 2.5 2.5V21M12 3v7a2.5 2.5 0 0 1-2.5 2.5M17 3c-2.2 1.6-3 4-3 7v3h3v8"/>'),
+  menu:svg('<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5V4.5M9 7h7"/>'),
+  fridge:svg('<rect x="5" y="2" width="14" height="20" rx="3"/><path d="M5 10h14M9 5.5v1.5M9 13v3"/>'),
+  list:svg('<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h3l2.4 11.5h11l2-8H6"/>'),
+  x:svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+  heart:svg('<path d="M12 20.5s-7.5-4.6-7.5-10.4A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7.5 2.5c0 5.8-7.5 10.4-7.5 10.4z"/>'),
+  play:svg('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>'),
+  clock:svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  euro:svg('<path d="M18 6.5A7 7 0 1 0 18 17.5M4 10.5h9M4 13.5h9"/>'),
+  users:svg('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M16 5.2a3 3 0 0 1 0 5.6M18 14.8c1.8.7 3 2.4 3 5.2"/>')
+};
+const hue=r=>`--h:${(r.id*47+12)%360}`;
+
 // ---- vues ----
 function ingredients(r,qty){
   return r.i.map(([k,q,u])=>`<span class="ing ${S.fridge.includes(k)?'have':'miss'}">${ING[k][2]} ${ing(k)}${qty?' · '+fq(q*S.persons,u):''}</span>`).join('');
@@ -87,12 +103,12 @@ function render(){
   const open=S.list.filter(x=>!x.done).length;
   const views={tonight:viewTonight,menu:viewMenu,fridge:viewFridge,list:viewList};
   $('#app').innerHTML=`
-   <header><div class="logo">cosa<span>mangio</span>?</div>
-     <div class="hbtns">${deferredInstall?`<button class="pill" data-a="install">${t('install')}</button>`:''}<button class="pill" data-a="lang">${S.lang==='it'?'🇫🇷 FR':'🇮🇹 IT'}</button><button class="pill accent" data-a="pitch">▶</button></div></header>
+   <header><div class="logo">cosa mangio<b>?</b></div>
+     <div class="hbtns">${deferredInstall?`<button class="pill" data-a="install">${t('install')}</button>`:''}<button class="pill" data-a="lang">${S.lang==='it'?'FR':'IT'}</button><button class="pill icon" data-a="pitch" aria-label="Pitch">${ICON.play}</button></div></header>
    <main id="main">${(views[S.tab]||viewTonight)()}</main>
-   <nav>${[['tonight','🍽️'],['menu','📖'],['fridge','🧊'],['list','🛒']].map(([k,i])=>{
+   <nav>${['tonight','menu','fridge','list'].map(k=>{
      const n=k==='list'?open:k==='menu'?S.menu.length:0;
-     return `<button class="${S.tab===k?'on':''}" data-a="tab" data-v="${k}"><span class="ic">${i}</span>${t(k)}${n?`<span class="badge">${n}</span>`:''}</button>`}).join('')}</nav>`;
+     return `<button class="${S.tab===k?'on':''}" data-a="tab" data-v="${k}"><span class="ic">${ICON[k]}${n?`<span class="badge">${n}</span>`:''}</span>${t(k)}</button>`}).join('')}</nav>`;
   $('#main').scrollTop=top;
   if(S.tab==='tonight') bindDrag();
 }
@@ -102,26 +118,27 @@ function viewTonight(){
   let cards='';
   if(!top.length){
     const none=R.filter(r=>r.t<=S.time&&r.c<=S.budget&&(!S.veg||r.v)&&!S.menu.includes(r.id)).length===0;
-    cards=`<div class="empty"><p>${none?t('nothing'):t('empty')}</p>${none?'':`<br><button class="btn" data-a="reset">${t('again')}</button>`}</div>`;
+    cards=`<div class="empty"><span class="big">${none?'🍽️':'🎉'}</span><p>${none?t('nothing'):t('empty')}</p>${none?'':`<br><button class="btn" data-a="reset">${t('again')}</button>`}</div>`;
   } else {
     cards=`<div class="deck">`+top.map((r,i)=>i).reverse().map(i=>{
       const r=top[i];
-      return `<div class="rc ${i===1?'back1':i===2?'back2':''}" data-top="${i===0?1:0}" data-id="${r.id}">
-        <div class="stamp y">♥</div><div class="stamp n">✕</div>
-        <div class="emo">${r.e}</div><h3>${r.n[L()]}</h3>
-        <div class="meta"><span>⏱ ${r.t} ${t('min')}</span><span>💶 ~${r.c} € ${t('perPerson')}</span></div>
-        <div class="ings">${ingredients(r)}</div></div>`}).join('')+`</div>
-      <div class="actions"><button class="round no" data-a="no">✕</button><button class="round yes" data-a="yes">♥</button></div>`;
+      return `<div class="rc ${i===1?'back1':i===2?'back2':''}" data-top="${i===0?1:0}" data-id="${r.id}" style="${hue(r)}">
+        <div class="stamp y">${S.lang==='it'?'LO FACCIO':'JE LE FAIS'}</div><div class="stamp n">${S.lang==='it'?'PASSO':'SUIVANT'}</div>
+        <div class="hero"><div class="plate">${r.e}</div></div>
+        <div class="body"><h3>${r.n[L()]}</h3>
+        <div class="meta"><span>${ICON.clock}${r.t} ${t('min')}</span><span>${ICON.euro}~${r.c} € ${t('perPerson')}</span></div>
+        <div class="ings">${ingredients(r)}</div></div></div>`}).join('')+`</div>
+      <div class="actions"><button class="round no" data-a="no" aria-label="No">${ICON.x}</button><button class="round yes" data-a="yes" aria-label="Sì">${ICON.heart}</button></div>`;
   }
   return `<h2>${t('title')}</h2><p class="sub">${t('sub')}</p>
-    <div class="filters">${[15,30,45,90].map(v=>f('time',v)+`⏱ ≤${v}'</span>`).join('')}${[3,4,6].map(v=>f('budget',v)+`💶 ≤${v}€</span>`).join('')}
-    ${[1,2,4,6].map(v=>f('persons',v)+`👥 ${v}</span>`).join('')}<span class="chip ${S.veg?'on':''}" data-a="veg">🌱 ${t('veg')}</span></div>${cards}`;
+    <div class="filters">${[15,30,45,90].map(v=>f('time',v)+`≤ ${v} min</span>`).join('')}<i class="sep"></i>${[3,4,6].map(v=>f('budget',v)+`≤ ${v} €</span>`).join('')}<i class="sep"></i>
+    ${[1,2,4,6].map(v=>f('persons',v)+`👥 ${v}</span>`).join('')}<i class="sep"></i><span class="chip ${S.veg?'on':''}" data-a="veg">🌱 ${t('veg')}</span></div>${cards}`;
 }
 function viewMenu(){
   return `<h2>${t('menuT')}</h2><p class="sub">${t('menuS')} · 👥 ${S.persons} ${t('persons')}</p>`+
    (S.menu.length?S.menu.map(id=>{const r=RMAP[id],m=missing(r).length;
-     return `<div class="mi" data-a="open" data-v="${id}"><span class="e">${r.e}</span><div class="nm">${r.n[L()]}<small>⏱ ${r.t} ${t('min')} · ${m?`🛒 ${m} ${t('missing')}`:'✅ '+t('noMiss')}</small></div></div>`}).join('')
-    :`<div class="empty">${t('menuE')}</div>`);
+     return `<div class="mi" data-a="open" data-v="${id}" style="${hue(r)}"><span class="e">${r.e}</span><div class="nm">${r.n[L()]}<small>${r.t} ${t('min')} · ${m?`🛒 ${m} ${t('missing')}`:'✅ '+t('noMiss')}</small></div></div>`}).join('')
+    :`<div class="empty"><span class="big">📖</span>${t('menuE')}</div>`);
 }
 function viewFridge(){
   return `<h2>${t('fridgeT')}</h2><p class="sub">${t('fridgeS')}</p>`+
@@ -130,8 +147,8 @@ function viewFridge(){
 }
 function viewList(){
   let out=`<h2>${t('listT')}</h2><p class="sub">${t('listS')}</p>
-   <form id="addForm" class="addrow"><input id="addIn" placeholder="${t('addPh')}" autocomplete="off" maxlength="60"><button class="btn" type="submit">+</button></form>`;
-  if(!S.list.length) return out+`<div class="empty">${t('listE')}</div>`;
+   <form id="addForm" class="addrow"><input id="addIn" placeholder="${t('addPh')}" autocomplete="off" maxlength="60"><button class="btn" type="submit" aria-label="${t('addB')}">+</button></form>`;
+  if(!S.list.length) return out+`<div class="empty"><span class="big">🛒</span>${t('listE')}</div>`;
   ['base','veg','lat','car','other'].forEach(c=>{
     const items=S.list.map((x,i)=>({x,i})).filter(({x})=>(x.c?'other':ING[x.k][3])===c);
     if(!items.length) return;
@@ -141,20 +158,21 @@ function viewList(){
   });
   const anyDone=S.list.some(x=>x.done), anyOpen=S.list.some(x=>!x.done);
   return out+`<div class="row2">${anyOpen?`<button class="btn sec" data-a="share">📤 ${t('share')}</button>`:''}${anyDone?`<button class="btn sec" data-a="clearDone">🧹 ${t('clearDone')}</button>`:''}</div>
-   <div class="row2"><button class="btn sec" data-a="wipe" style="font-size:13px;color:var(--mute)">${t('reset')}</button></div>`;
+   <div class="row2"><button class="btn ghost" data-a="wipe">${t('reset')}</button></div>`;
 }
 
 // ---- fiches recette ----
 function recipeSheet(r,n,fromMenu){
   const s=document.createElement('div'); s.className='sheet';
-  s.innerHTML=`<div><div style="font-size:54px">${r.e}</div><h3>${r.n[L()]}</h3>
-    <div class="meta" style="justify-content:flex-start"><span>⏱ ${r.t} ${t('min')}</span><span>💶 ~${r.c} € ${t('perPerson')}</span><span>👥 ${S.persons}</span></div>
-    <div class="ings" style="justify-content:flex-start;margin:6px 0">${ingredients(r,true)}</div>
-    <p><b>${t('steps')} —</b> ${r.s[L()]}</p>
+  s.innerHTML=`<div style="${hue(r)}"><div class="grab"></div><div class="hero2">${r.e}</div><h3>${r.n[L()]}</h3>
+    <div class="meta"><span>${ICON.clock}${r.t} ${t('min')}</span><span>${ICON.euro}~${r.c} € ${t('perPerson')}</span><span>${ICON.users}${S.persons}</span></div>
+    <h4>${t('ingr')}</h4><div class="ings">${ingredients(r,true)}</div>
+    <h4>${t('steps')}</h4><p>${r.s[L()]}</p>
     ${fromMenu?`<button class="btn" style="width:100%" data-a="cooked" data-v="${r.id}">${t('cooked')}</button>
       <div class="row2"><button class="btn sec" data-a="unmenu" data-v="${r.id}">${t('remove')}</button><button class="btn sec" data-a="closeSheet">${t('close')}</button></div>`
-    :`<p style="color:var(--green);font-weight:700;margin-top:-6px">${n?`🛒 ${n} ${t('added')}`:`✅ ${t('noMiss')}`}</p>
+    :`<p class="ok">${n?`🛒 ${n} ${t('added')}`:`✅ ${t('noMiss')}`}</p>
       <button class="btn" style="width:100%" data-a="closeSheet">${t('cook')}</button>`}</div>`;
+  s.addEventListener('click',e=>{if(e.target===s)s.remove()});
   $('#app').appendChild(s);
 }
 
