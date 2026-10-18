@@ -5,23 +5,25 @@ const TXT = {
    perPerson:'a persona',nothing:'Nessuna ricetta con questi filtri. Allarga il budget o il tempo.',pitch:'Pitch',noMiss:'hai già tutto!',steps:'Come si fa',veg:'Vegetariano',
    menuT:'Il tuo menu',menuS:'Le ricette che hai scelto. Toccane una per vedere come si fa.',menuE:'Nessuna ricetta scelta. Vai su Stasera e scorri a destra ♥',
    missing:'da comprare',cooked:'✓ Cucinato',remove:'Rimuovi dal menu',close:'Chiudi',persons:'persone',addPh:'Aggiungi un articolo…',addB:'Aggiungi',
-   clearDone:'Svuota comprati',share:'Condividi',copied:'Lista copiata 📋',install:'Installa',other:'Altro',reset:'Azzera tutto',resetQ:'Cancellare menu, frigo e lista?'},
+   clearDone:'Svuota comprati',share:'Condividi',copied:'Lista copiata 📋',install:'Installa',other:'Altro',reset:'Azzera tutto',resetQ:'Cancellare menu, frigo e lista?',allBought:'Spesa completa! 🎉'},
  fr:{urgentTag:'À finir',undo:'Annuler',person:'personne',themeAuto:'Thème : automatique',themeLight:'Thème : clair',themeDark:'Thème : sombre',ingr:'Ingrédients',tonight:'Ce soir',menu:'Menu',fridge:'Frigo',list:'Courses',title:'On mange quoi ce soir ?',sub:'Swipe : ♥ je le fais, ✕ autre idée',min:'min',
    empty:'Tu as vu toutes les idées',again:'Recommencer',fridgeT:'Qu\'as-tu à la maison ?',fridgeS:'Touche = tu l\'as. Touche encore = à consommer vite 🟠 : les recettes qui l\'utilisent passent en premier.',
    listT:'Liste de courses',listS:'Elle se remplit toute seule. Coche = acheté → ça entre dans le frigo.',listE:'Rien à acheter 👌',cook:'Super, on cuisine !',added:'ajoutés aux courses',
    perPerson:'par personne',nothing:'Aucune recette avec ces filtres. Élargis le budget ou le temps.',pitch:'Pitch',noMiss:'tu as déjà tout !',steps:'Comment faire',veg:'Végétarien',
    menuT:'Ton menu',menuS:'Les recettes que tu as choisies. Touche-en une pour voir comment faire.',menuE:'Aucune recette choisie. Va sur Ce soir et swipe à droite ♥',
    missing:'à acheter',cooked:'✓ Cuisiné',remove:'Retirer du menu',close:'Fermer',persons:'personnes',addPh:'Ajouter un article…',addB:'Ajouter',
-   clearDone:'Vider les achetés',share:'Partager',copied:'Liste copiée 📋',install:'Installer',other:'Autre',reset:'Tout remettre à zéro',resetQ:'Effacer menu, frigo et liste ?'}
+   clearDone:'Vider les achetés',share:'Partager',copied:'Liste copiée 📋',install:'Installer',other:'Autre',reset:'Tout remettre à zéro',resetQ:'Effacer menu, frigo et liste ?',allBought:'Courses terminées ! 🎉'}
 };
 
 const KEY='cosamangio.v2', OLDKEY='cosamangio.v1';
+const TABS=['tonight','menu','fridge','list'];
 const DEFAULTS=()=>({theme:'auto',lang:'it',tab:'tonight',fridge:['pasta','uova','pomodoro','zucchine','parmigiano'],time:30,budget:4,veg:false,persons:2,skipped:[],menu:[],list:[],urgent:[],last:null});
 let S=DEFAULTS();
 try{const x=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(OLDKEY)||'null'); if(x) S=Object.assign(S,x);}catch(e){}
 S.menu=S.menu.filter(id=>RMAP[id]);
 S.list=S.list.filter(x=>x.c||ING[x.k]);
 S.urgent=(S.urgent||[]).filter(k=>ING[k]&&S.fridge.includes(k));
+if(!TABS.includes(S.tab)) S.tab='tonight';
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const L=()=>S.lang==='fr'?1:0;
 const t=k=>TXT[S.lang][k];
@@ -83,9 +85,11 @@ function listText(){
   return S.list.filter(x=>!x.done).map(x=>'• '+(x.c?x.c:ING[x.k][2]+' '+ing(x.k)+(need(x.k)?' ('+need(x.k)+')':''))).join('\n');
 }
 function toast(msg){
+  const old=document.querySelector('.toast'); if(old) old.remove();
   const d=document.createElement('div'); d.className='toast'; d.textContent=msg; $('#app').appendChild(d);
-  setTimeout(()=>d.remove(),1800);
+  setTimeout(()=>{d.classList.add('out'); setTimeout(()=>d.remove(),250)},1700);
 }
+const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
 
 // ---- icônes ----
 const svg=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
@@ -106,7 +110,10 @@ const ICON={
 };
 const hue=r=>`--h:${(r.id*47+12)%360}`;
 
-// ---- vues ----
+// ---- rendu ----
+let shellBuilt=false, animNext=true, tabDir=1, promoteNext=false, popIdx=-1;
+const prevCounts={};
+
 function ingredients(r,qty){
   return r.i.map(([k,q,u])=>`<span class="ing ${S.urgent.includes(k)?'urg':S.fridge.includes(k)?'have':'miss'}">${ING[k][2]} ${ing(k)}${qty?' · '+fq(q*S.persons,u):''}</span>`).join('');
 }
@@ -116,20 +123,36 @@ function applyTheme(){
   const m=document.querySelector('meta[name=theme-color]');
   if(m) m.content=(S.theme==='dark'||(S.theme!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches))?'#16120e':'#faf5ec';
 }
+function buildShell(){
+  $('#app').innerHTML=`
+   <header><div class="logo">cosa mangio<b>?</b></div><div class="hbtns" id="hbtns"></div></header>
+   <main id="main"></main>
+   <nav id="nav"><i class="navind"></i>${TABS.map(k=>`<button data-a="tab" data-v="${k}"><span class="ic">${ICON[k]}<span class="badge" hidden></span></span><span class="lbl"></span></button>`).join('')}</nav>`;
+}
 function render(){
-  const old=$('#main'), top=old?old.scrollTop:0;
+  if(!shellBuilt){ buildShell(); shellBuilt=true; }
   document.documentElement.lang=S.lang;
   applyTheme();
-  const open=S.list.filter(x=>!x.done).length;
+  const thName='theme'+S.theme[0].toUpperCase()+S.theme.slice(1);
+  $('#hbtns').innerHTML=`${deferredInstall?`<button class="pill" data-a="install">${t('install')}</button>`:''}<button class="pill icon2" data-a="theme" aria-label="${t(thName)}" title="${t(thName)}">${ICON[S.theme]}</button><button class="pill" data-a="lang">${S.lang==='it'?'FR':'IT'}</button><button class="pill icon" data-a="pitch" aria-label="Pitch">${ICON.play}</button>`;
+  const nav=$('#nav');
+  nav.style.setProperty('--i',TABS.indexOf(S.tab));
+  nav.querySelectorAll('button').forEach((b,i)=>{
+    const k=TABS[i], n=k==='list'?S.list.filter(x=>!x.done).length:k==='menu'?S.menu.length:0;
+    b.classList.toggle('on',S.tab===k);
+    b.querySelector('.lbl').textContent=t(k);
+    const bd=b.querySelector('.badge'); bd.textContent=n; bd.hidden=!n;
+    if(n&&n!==(prevCounts[k]||0)){ bd.classList.remove('bump'); void bd.offsetWidth; bd.classList.add('bump'); }
+    prevCounts[k]=n;
+  });
+  const main=$('#main'), top=main.scrollTop, anim=animNext;
+  main.style.setProperty('--dx',(tabDir*22)+'px');
+  main.className=anim?'anim':'';
   const views={tonight:viewTonight,menu:viewMenu,fridge:viewFridge,list:viewList};
-  $('#app').innerHTML=`
-   <header><div class="logo">cosa mangio<b>?</b></div>
-     <div class="hbtns">${deferredInstall?`<button class="pill" data-a="install">${t('install')}</button>`:''}<button class="pill icon2" data-a="theme" aria-label="${t('theme'+S.theme[0].toUpperCase()+S.theme.slice(1))}" title="${t('theme'+S.theme[0].toUpperCase()+S.theme.slice(1))}">${ICON[S.theme]}</button><button class="pill" data-a="lang">${S.lang==='it'?'FR':'IT'}</button><button class="pill icon" data-a="pitch" aria-label="Pitch">${ICON.play}</button></div></header>
-   <main id="main">${(views[S.tab]||viewTonight)()}</main>
-   <nav>${['tonight','menu','fridge','list'].map(k=>{
-     const n=k==='list'?open:k==='menu'?S.menu.length:0;
-     return `<button class="${S.tab===k?'on':''}" data-a="tab" data-v="${k}"><span class="ic">${ICON[k]}${n?`<span class="badge">${n}</span>`:''}</span>${t(k)}</button>`}).join('')}</nav>`;
-  $('#main').scrollTop=top;
+  main.innerHTML=views[S.tab]();
+  main.scrollTop=anim?0:top;
+  if(anim) [...main.children].forEach((c,i)=>{c.style.animationDelay=Math.min(i,14)*45+'ms'});
+  animNext=false; promoteNext=false; popIdx=-1;
   if(S.tab==='tonight') bindDrag();
 }
 function viewTonight(){
@@ -142,7 +165,7 @@ function viewTonight(){
   } else {
     cards=`<div class="deck">`+top.map((r,i)=>i).reverse().map(i=>{
       const r=top[i];
-      return `<div class="rc ${i===1?'back1':i===2?'back2':''}" data-top="${i===0?1:0}" data-id="${r.id}" style="${hue(r)}">
+      return `<div class="rc ${i===1?'back1':i===2?'back2':''} ${i===0&&promoteNext?'promote':''}" data-top="${i===0?1:0}" data-id="${r.id}" style="${hue(r)}">
         <div class="stamp y">${S.lang==='it'?'LO FACCIO':'JE LE FAIS'}</div><div class="stamp n">${S.lang==='it'?'PASSO':'SUIVANT'}</div>
         <div class="hero"><div class="plate">${r.e}</div></div>
         ${urgentIn(r).length?`<div class="urgtag">⏳ ${t('urgentTag')} : ${urgentIn(r).map(ing).join(', ')}</div>`:''}
@@ -177,7 +200,7 @@ function viewList(){
     const items=S.list.map((x,i)=>({x,i})).filter(({x})=>(x.c?'other':ING[x.k][3])===c);
     if(!items.length) return;
     out+=`<div class="cat">${CATS[c][L()]}</div>`+items.map(({x,i})=>
-      `<div class="list-item ${x.done?'done':''}" data-a="buy" data-v="${i}"><div class="box">${x.done?'✓':''}</div>
+      `<div class="list-item ${x.done?'done':''} ${i===popIdx?'pop':''}" data-a="buy" data-v="${i}"><div class="box">${x.done?'✓':''}</div>
        <div class="nm">${x.c?esc(x.c):ING[x.k][2]+' '+ing(x.k)}</div><span class="qty">${x.k?need(x.k):''}</span></div>`).join('');
   });
   const anyDone=S.list.some(x=>x.done), anyOpen=S.list.some(x=>!x.done);
@@ -188,7 +211,8 @@ function viewList(){
 // ---- fiches recette ----
 function recipeSheet(r,n,fromMenu){
   const s=document.createElement('div'); s.className='sheet';
-  s.innerHTML=`<div style="${hue(r)}"><div class="grab"></div><div class="hero2">${r.e}</div><h3>${r.n[L()]}</h3>
+  s.dataset.id=r.id;
+  s.innerHTML=`<div style="${hue(r)}"><div class="sh-head"><div class="grab"></div><div class="hero2">${r.e}</div><h3>${r.n[L()]}</h3></div>
     <div class="meta"><span>${ICON.clock}${r.t} ${t('min')}</span><span>${ICON.euro}~${r.c} € ${t('perPerson')}</span><span>${ICON.users}${S.persons}</span></div>
     <h4>${t('ingr')}</h4><div class="ings">${ingredients(r,true)}</div>
     <h4>${t('steps')}</h4><p>${r.s[L()]}</p>
@@ -196,29 +220,61 @@ function recipeSheet(r,n,fromMenu){
       <div class="row2"><button class="btn sec" data-a="unmenu" data-v="${r.id}">${t('remove')}</button><button class="btn sec" data-a="closeSheet">${t('close')}</button></div>`
     :`<p class="ok">${n?`🛒 ${n} ${t('added')}`:`✅ ${t('noMiss')}`}</p>
       <button class="btn" style="width:100%" data-a="closeSheet">${t('cook')}</button>`}</div>`;
-  s.addEventListener('click',e=>{if(e.target===s)s.remove()});
+  s.addEventListener('click',e=>{if(e.target===s)closeSheet(s)});
   $('#app').appendChild(s);
+  sheetDrag(s);
 }
 
-// ---- swipe ----
+// ---- swipe (physique) ----
 function decide(yes){
   const el=document.querySelector('.rc[data-top="1"]'); if(!el||el.dataset.busy) return;
   el.dataset.busy=1;
   const r=RMAP[+el.dataset.id];
-  el.classList.remove('drag'); el.style.transform=`translateX(${yes?500:-500}px) rotate(${yes?25:-25}deg)`; el.style.opacity=0;
+  const box=el.getBoundingClientRect();
+  el.classList.remove('drag');
+  el.style.transition='transform .42s cubic-bezier(.2,.7,.3,1), opacity .34s ease-in .08s';
+  el.style.transform=`translateX(${yes?620:-620}px) translateY(-30px) rotate(${yes?28:-28}deg)`; el.style.opacity=0;
+  const b1=document.querySelector('.rc.back1'), b2=document.querySelector('.rc.back2');
+  if(b1){ b1.style.transform='scale(1) translateY(0)'; b1.style.opacity=1; }
+  if(b2){ b2.style.transform='scale(.95) translateY(14px)'; b2.style.opacity=.85; }
+  if(yes){ buzz(14); confetti({x:box.left+box.width/2,y:box.top+box.height/2,count:26,power:9,shape:'heart',spread:Math.PI*1.5}); }
   setTimeout(()=>{
     let n=0;
     if(yes){ n=addToMenu(r); S.last={kind:'menu',id:r.id}; } else { S.skipped.push(r.id); S.last={kind:'skip',id:r.id}; }
-    save(); render();
+    save(); promoteNext=true; render();
     if(yes) recipeSheet(r,n,false);
-  },180);
+  },300);
 }
 function bindDrag(){
   const el=document.querySelector('.rc[data-top="1"]'); if(!el) return;
-  let x0=null, dx=0; const y=el.querySelector('.stamp.y'), n=el.querySelector('.stamp.n');
-  el.onpointerdown=e=>{x0=e.clientX;dx=0;el.classList.add('drag');el.setPointerCapture(e.pointerId)};
-  el.onpointermove=e=>{if(x0===null)return;dx=e.clientX-x0;el.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`;y.style.opacity=Math.max(0,dx/100);n.style.opacity=Math.max(0,-dx/100)};
-  const end=()=>{if(x0===null)return;x0=null;if(Math.abs(dx)>90)decide(dx>0);else{el.classList.remove('drag');el.style.transform='';y.style.opacity=0;n.style.opacity=0}};
+  const y=el.querySelector('.stamp.y'), n=el.querySelector('.stamp.n');
+  const b1=document.querySelector('.rc.back1'), b2=document.querySelector('.rc.back2');
+  let x0=null,dx=0,vx=0,lx=0,lt=0;
+  const progress=p=>{
+    if(b1){ b1.style.transform=`scale(${.95+.05*p}) translateY(${14-14*p}px)`; b1.style.opacity=.85+.15*p; }
+    if(b2){ b2.style.transform=`scale(${.9+.05*p}) translateY(${28-14*p}px)`; b2.style.opacity=.55+.3*p; }
+  };
+  el.onpointerdown=e=>{ if(el.dataset.busy) return; x0=e.clientX;dx=0;vx=0;lx=x0;lt=performance.now();
+    el.classList.add('drag'); el.style.transition='none'; el.setPointerCapture(e.pointerId); };
+  el.onpointermove=e=>{
+    if(x0===null) return;
+    const now=performance.now(); dx=e.clientX-x0;
+    vx=.7*vx+.3*((e.clientX-lx)/Math.max(1,now-lt)); lx=e.clientX; lt=now;
+    el.style.transform=`translate(${dx}px,${-Math.abs(dx)*.05}px) rotate(${dx/16}deg)`;
+    y.style.opacity=Math.max(0,Math.min(1,dx/90)); n.style.opacity=Math.max(0,Math.min(1,-dx/90));
+    y.style.transform=`rotate(-10deg) scale(${.8+Math.min(.4,Math.max(0,dx)/250)})`;
+    n.style.transform=`rotate(10deg) scale(${.8+Math.min(.4,Math.max(0,-dx)/250)})`;
+    progress(Math.min(1,Math.abs(dx)/140));
+  };
+  const end=()=>{
+    if(x0===null) return; x0=null;
+    if(Math.abs(dx)>110||(Math.abs(vx)>.55&&Math.abs(dx)>35)) decide(dx>0||(dx===0&&vx>0));
+    else {
+      el.classList.remove('drag');
+      el.style.transition='transform .55s cubic-bezier(.34,1.56,.64,1)';
+      el.style.transform=''; y.style.opacity=0; n.style.opacity=0; progress(0);
+    }
+  };
   el.onpointerup=end; el.onpointercancel=end;
 }
 
@@ -231,20 +287,32 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('#app [data-a]'); if(!b) return;
   const a=b.dataset.a, v=b.dataset.v;
   if(a==='lang'){S.lang=S.lang==='it'?'fr':'it'}
-  else if(a==='tab'){S.tab=v}
-  else if(a==='theme'){S.theme=S.theme==='auto'?'light':S.theme==='light'?'dark':'auto'; save(); render(); toast(t('theme'+S.theme[0].toUpperCase()+S.theme.slice(1))); return}
+  else if(a==='tab'){ if(S.tab===v) return; tabDir=TABS.indexOf(v)>TABS.indexOf(S.tab)?1:-1; S.tab=v; animNext=true; buzz(6); }
+  else if(a==='theme'){
+    const r=b.getBoundingClientRect();
+    S.theme=S.theme==='auto'?'light':S.theme==='light'?'dark':'auto'; save();
+    withReveal(()=>render(),r.left+r.width/2,r.top+r.height/2);
+    toast(t('theme'+S.theme[0].toUpperCase()+S.theme.slice(1))); return;
+  }
   else if(a==='f'){S[b.dataset.k]=+v}
   else if(a==='veg'){S.veg=!S.veg}
   else if(a==='fr'){toggleFridge(v)}
-  else if(a==='buy'){toggleBought(+v)}
+  else if(a==='buy'){
+    popIdx=+v; toggleBought(+v);
+    if(S.list.length&&S.list.every(x=>x.done)){ const r=b.getBoundingClientRect(); confetti({x:r.left+r.width/2,y:r.top,count:70,power:11,spread:Math.PI}); toast(t('allBought')); buzz([10,40,10]); }
+  }
   else if(a==='yes'){return decide(true)}
   else if(a==='no'){return decide(false)}
-  else if(a==='reset'){S.skipped=[]; S.last=null}
-  else if(a==='undo'){undo()}
+  else if(a==='reset'){S.skipped=[]; S.last=null; promoteNext=true}
+  else if(a==='undo'){undo(); promoteNext=true}
   else if(a==='open'){return recipeSheet(RMAP[+v],0,true)}
-  else if(a==='cooked'||a==='unmenu'){removeFromMenu(+v)}
+  else if(a==='cooked'||a==='unmenu'){
+    const sh=b.closest('.sheet');
+    if(a==='cooked'){ const r=b.getBoundingClientRect(); confetti({x:r.left+r.width/2,y:r.top,count:90,power:13,spread:Math.PI*1.1}); buzz([12,50,12]); }
+    removeFromMenu(+v); closeSheet(sh);
+  }
   else if(a==='clearDone'){S.list=S.list.filter(x=>!x.done)}
-  else if(a==='wipe'){if(!confirm(t('resetQ')))return; const lang=S.lang; S=DEFAULTS(); S.lang=lang; S.tab='tonight'}
+  else if(a==='wipe'){if(!confirm(t('resetQ')))return; const lang=S.lang; S=DEFAULTS(); S.lang=lang; S.tab='tonight'; animNext=true}
   else if(a==='share'){
     const txt=listText();
     if(navigator.share) navigator.share({title:t('listT'),text:txt}).catch(()=>{});
@@ -252,7 +320,7 @@ document.addEventListener('click',e=>{
     return;
   }
   else if(a==='install'){if(deferredInstall){deferredInstall.prompt();deferredInstall=null}}
-  else if(a==='closeSheet'){b.closest('.sheet').remove();return}
+  else if(a==='closeSheet'){closeSheet(b.closest('.sheet'));return}
   else if(a==='pitch'){return openPitch()}
   save(); render();
 });
@@ -260,7 +328,7 @@ document.addEventListener('submit',e=>{
   if(e.target.id!=='addForm') return;
   e.preventDefault();
   const v=$('#addIn').value.trim(); if(!v) return;
-  S.list.push({c:v,done:false}); save(); render(); const i=$('#addIn'); if(i) i.focus();
+  S.list.push({c:v,done:false}); popIdx=S.list.length-1; save(); render(); const i=$('#addIn'); if(i) i.focus();
 });
 document.addEventListener('keydown',e=>{
   if(S.tab!=='tonight'||$('.sheet')||$('#pitch').classList.contains('show')||e.target.closest('input')) return;
@@ -268,3 +336,4 @@ document.addEventListener('keydown',e=>{
 });
 
 render();
+splash();
