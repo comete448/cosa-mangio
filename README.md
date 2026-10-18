@@ -1,6 +1,6 @@
 # Cosa Mangio?
 
-App web (PWA) bilingue IT/FR : « Qu'est-ce que je mange ce soir ? ». Filtre par temps, budget, régime et nombre de personnes, swipe les recettes, et la liste de courses se remplit toute seule. Fonctionne hors-ligne et s'installe sur l'écran d'accueil.
+App web (PWA) bilingue IT/FR : « Qu'est-ce que je mange ce soir ? ». 107 recettes, swipe façon Tinder, filtres (temps, budget, personnes, végétarien, type de plat), recherche, menu, liste de courses automatique avec quantités, et mode anti-gaspillage (ingrédients « à finir » prioritaires). Fonctionne hors-ligne et s'installe sur l'écran d'accueil.
 
 Site statique, sans build ni dépendance. Données sauvegardées dans le navigateur (`localStorage`).
 
