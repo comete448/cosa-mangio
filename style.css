@@ -270,3 +270,45 @@ main.anim>*{animation:enter .55s var(--ease) both}
 .stats span{color:var(--mute);font-size:12px;line-height:1.3}
 nav button{min-width:0}
 nav .lbl{font-size:10.5px}
+
+/* ===== v5 : tutoriel de première utilisation ===== */
+.onb{position:absolute;inset:0;z-index:55;background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--bg) 88%,var(--accent)));display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top)) 22px calc(18px + env(safe-area-inset-bottom));animation:fade .35s}
+.onb.out{opacity:0;transform:scale(1.04);transition:opacity .35s,transform .35s;pointer-events:none}
+.onb-top{display:flex;align-items:center;justify-content:space-between;height:34px;flex:none}
+.onb-dots{display:flex;gap:6px}
+.onb-dots i{width:8px;height:8px;border-radius:99px;background:var(--line);transition:all .4s var(--spring)}
+.onb-dots i.on{width:26px;background:var(--accent)}
+.onb-skip{border:0;background:none;color:var(--mute);font-weight:600;font-size:14px;cursor:pointer;padding:8px}
+.onb-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;animation:enter .5s var(--ease) both}
+.onb-body.scroll{align-items:stretch;justify-content:flex-start;text-align:left;overflow-y:auto;padding-top:8px;scrollbar-width:none}
+.onb-body.scroll::-webkit-scrollbar{display:none}
+.onb-body h2{font-size:28px;margin-top:4px}
+.onb-body .sub{max-width:320px;font-size:15px;margin-top:6px}
+.onb-body.scroll .sub{max-width:none}
+.onb-emoji{font-size:84px;animation:float 3.5s ease-in-out infinite}
+.onb-langs{display:flex;gap:10px;margin-top:14px}
+.onb-langs .btn{min-width:130px}
+.onb-nav{display:flex;justify-content:space-between;gap:10px;padding-top:12px;flex:none}
+.onb-nav .btn{min-width:120px}
+
+.demo-wrap{height:230px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.demo-card{position:relative;width:170px;border:1px solid var(--line);background:var(--surface);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;animation:demoswipe 4.2s ease-in-out infinite}
+.dhero{height:110px;display:flex;align-items:center;justify-content:center;background:hsl(var(--h) var(--hero-s) var(--hero));font-size:56px}
+.dname{padding:12px;font-family:var(--serif);font-size:17px;font-weight:700;text-align:left}
+.dstamp{position:absolute;top:10px;z-index:2;font-size:11px;font-weight:800;border:2px solid;border-radius:8px;padding:2px 7px;background:var(--surface);opacity:0}
+.dy{left:10px;color:var(--green);transform:rotate(-10deg);animation:demoy 4.2s infinite}
+.dn{right:10px;color:var(--accent);transform:rotate(10deg);animation:demon 4.2s infinite}
+@keyframes demoswipe{0%,8%{transform:none}28%{transform:translateX(64px) rotate(9deg)}38%,52%{transform:none}72%{transform:translateX(-64px) rotate(-9deg)}82%,100%{transform:none}}
+@keyframes demoy{0%,12%{opacity:0}26%,32%{opacity:1}40%,100%{opacity:0}}
+@keyframes demon{0%,56%{opacity:0}70%,76%{opacity:1}84%,100%{opacity:0}}
+
+.demo-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:22px}
+.demo-chips i{font-style:normal;color:var(--mute)}
+.demo-chips .chip{display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:9px 12px;font-size:14px;animation:fadeup .5s var(--ease) both}
+.demo-chips .chip:nth-of-type(2){animation-delay:.2s}
+.demo-chips .chip:nth-of-type(3){animation-delay:.4s}
+.demo-chips em{font-style:normal;font-size:10px;opacity:.85}
+.demo-list{width:100%;max-width:300px;margin-bottom:18px;text-align:left}
+.demo-list .list-item{pointer-events:none;animation:fadeup .5s var(--ease) both}
+.demo-list .list-item:nth-child(2){animation-delay:.15s}
+.demo-list .list-item:nth-child(3){animation-delay:.3s}

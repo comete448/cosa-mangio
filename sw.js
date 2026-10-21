@@ -1,6 +1,6 @@
 // Incrémenter CACHE à chaque déploiement pour forcer la mise à jour chez les utilisateurs.
-const CACHE = 'cosamangio-v7';
-const ASSETS = ['./','index.html','style.css','recipes.js','recipes2.js','fx.js','app.js','pitch.js','manifest.webmanifest',
+const CACHE = 'cosamangio-v8';
+const ASSETS = ['./','index.html','style.css','recipes.js','recipes2.js','fx.js','onboard.js','app.js','pitch.js','manifest.webmanifest',
   'icons/icon.svg','icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

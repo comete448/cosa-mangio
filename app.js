@@ -1,5 +1,5 @@
 const TXT = {
- it:{recipes:'Ricette',recipesT:'Tutte le ricette',recipesS:'ricette: cerca per nome o ingrediente',searchPh:'Cerca… (es. zucca, pollo)',noResults:'Nessun risultato',addMenu:'＋ Aggiungi al menu',inMenu:'✓ Nel menu',
+ it:{tuto:'Rivedi il tutorial',recipes:'Ricette',recipesT:'Tutte le ricette',recipesS:'ricette: cerca per nome o ingrediente',searchPh:'Cerca… (es. zucca, pollo)',noResults:'Nessun risultato',addMenu:'＋ Aggiungi al menu',inMenu:'✓ Nel menu',
    kAll:'Tutto',kPasta:'🍝 Pasta',kRice:'🍚 Riso',kSoup:'🥣 Zuppe',kMeat:'🍗 Carne',kFish:'🐟 Pesce',kOther:'🥗 Altro',filters:'Filtri',
    statCooked:'piatti cucinati',statSaved:'ingredienti salvati dallo spreco',addedMenu:'Aggiunto al menu',
    urgentTag:'Da finire',undo:'Annulla',person:'persona',themeAuto:'Tema: automatico',themeLight:'Tema: chiaro',themeDark:'Tema: scuro',ingr:'Ingredienti',tonight:'Stasera',menu:'Menu',fridge:'Frigo',list:'Spesa',title:'Cosa mangio stasera?',sub:'Scorri: ♥ lo faccio, ✕ un\'altra idea',min:'min',
@@ -9,7 +9,7 @@ const TXT = {
    menuT:'Il tuo menu',menuS:'Le ricette che hai scelto. Toccane una per vedere come si fa.',menuE:'Nessuna ricetta scelta. Vai su Stasera e scorri a destra ♥',
    missing:'da comprare',cooked:'✓ Cucinato',remove:'Rimuovi dal menu',close:'Chiudi',persons:'persone',addPh:'Aggiungi un articolo…',addB:'Aggiungi',
    clearDone:'Svuota comprati',share:'Condividi',copied:'Lista copiata 📋',install:'Installa',other:'Altro',reset:'Azzera tutto',resetQ:'Cancellare menu, frigo e lista?',allBought:'Spesa completa! 🎉'},
- fr:{recipes:'Recettes',recipesT:'Toutes les recettes',recipesS:'recettes : cherche par nom ou ingrédient',searchPh:'Chercher… (ex. potiron, poulet)',noResults:'Aucun résultat',addMenu:'＋ Ajouter au menu',inMenu:'✓ Dans le menu',
+ fr:{tuto:'Revoir le tutoriel',recipes:'Recettes',recipesT:'Toutes les recettes',recipesS:'recettes : cherche par nom ou ingrédient',searchPh:'Chercher… (ex. potiron, poulet)',noResults:'Aucun résultat',addMenu:'＋ Ajouter au menu',inMenu:'✓ Dans le menu',
    kAll:'Tout',kPasta:'🍝 Pâtes',kRice:'🍚 Riz',kSoup:'🥣 Soupes',kMeat:'🍗 Viande',kFish:'🐟 Poisson',kOther:'🥗 Autre',filters:'Filtres',
    statCooked:'plats cuisinés',statSaved:'ingrédients sauvés du gaspillage',addedMenu:'Ajouté au menu',
    urgentTag:'À finir',undo:'Annuler',person:'personne',themeAuto:'Thème : automatique',themeLight:'Thème : clair',themeDark:'Thème : sombre',ingr:'Ingrédients',tonight:'Ce soir',menu:'Menu',fridge:'Frigo',list:'Courses',title:'On mange quoi ce soir ?',sub:'Swipe : ♥ je le fais, ✕ autre idée',min:'min',
@@ -34,9 +34,9 @@ R.forEach(r=>{
     :ks.some(k=>FISH.includes(k))?'fish'
     :ks.some(k=>MEAT.includes(k))?'meat':'other';
 });
-const DEFAULTS=()=>({kind:'all',fopen:false,q:'',stats:{cooked:0,saved:0},theme:'auto',lang:'it',tab:'tonight',fridge:['pasta','uova','pomodoro','zucchine','parmigiano'],time:30,budget:4,veg:false,persons:2,skipped:[],menu:[],list:[],urgent:[],last:null});
+const DEFAULTS=()=>({onboarded:false,kind:'all',fopen:false,q:'',stats:{cooked:0,saved:0},theme:'auto',lang:'it',tab:'tonight',fridge:['pasta','uova','pomodoro','zucchine','parmigiano'],time:30,budget:4,veg:false,persons:2,skipped:[],menu:[],list:[],urgent:[],last:null});
 let S=DEFAULTS();
-try{const x=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(OLDKEY)||'null'); if(x) S=Object.assign(S,x);}catch(e){}
+try{const x=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(OLDKEY)||'null'); if(x){ S=Object.assign(S,x); if(x.onboarded===undefined) S.onboarded=true; }}catch(e){}
 S.menu=S.menu.filter(id=>RMAP[id]);
 S.list=S.list.filter(x=>x.c||ING[x.k]);
 S.urgent=(S.urgent||[]).filter(k=>ING[k]&&S.fridge.includes(k));
@@ -237,7 +237,8 @@ function viewFridge(){
 function viewList(){
   let out=`<h2>${t('listT')}</h2><p class="sub">${t('listS')}</p>
    <form id="addForm" class="addrow"><input id="addIn" placeholder="${t('addPh')}" autocomplete="off" maxlength="60"><button class="btn" type="submit" aria-label="${t('addB')}">+</button></form>`;
-  if(!S.list.length) return out+`<div class="empty"><span class="big">🛒</span>${t('listE')}</div>`;
+  if(!S.list.length) return out+`<div class="empty"><span class="big">🛒</span>${t('listE')}</div>
+   <div class="row2"><button class="btn ghost" data-a="tuto">❓ ${t('tuto')}</button><button class="btn ghost" data-a="wipe">${t('reset')}</button></div>`;
   ['base','veg','lat','car','other'].forEach(c=>{
     const items=S.list.map((x,i)=>({x,i})).filter(({x})=>(x.c?'other':ING[x.k][3])===c);
     if(!items.length) return;
@@ -247,7 +248,7 @@ function viewList(){
   });
   const anyDone=S.list.some(x=>x.done), anyOpen=S.list.some(x=>!x.done);
   return out+`<div class="row2">${anyOpen?`<button class="btn sec" data-a="share">📤 ${t('share')}</button>`:''}${anyDone?`<button class="btn sec" data-a="clearDone">🧹 ${t('clearDone')}</button>`:''}</div>
-   <div class="row2"><button class="btn ghost" data-a="wipe">${t('reset')}</button></div>`;
+   <div class="row2"><button class="btn ghost" data-a="tuto">❓ ${t('tuto')}</button><button class="btn ghost" data-a="wipe">${t('reset')}</button></div>`;
 }
 
 // ---- fiches recette ----
@@ -371,7 +372,8 @@ document.addEventListener('click',e=>{
     removeFromMenu(+v); closeSheet(sh);
   }
   else if(a==='clearDone'){S.list=S.list.filter(x=>!x.done)}
-  else if(a==='wipe'){if(!confirm(t('resetQ')))return; const lang=S.lang; S=DEFAULTS(); S.lang=lang; S.tab='tonight'; animNext=true}
+  else if(a==='wipe'){if(!confirm(t('resetQ')))return; const lang=S.lang; S=DEFAULTS(); S.lang=lang; S.tab='tonight'; S.onboarded=true; animNext=true}
+  else if(a==='tuto'){return startOnboarding(false)}
   else if(a==='share'){
     const txt=listText();
     if(navigator.share) navigator.share({title:t('listT'),text:txt}).catch(()=>{});
@@ -400,7 +402,7 @@ document.addEventListener('keydown',e=>{
   if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('#app [data-a]:not(button)')){ e.preventDefault(); e.target.click(); }
 });
 document.addEventListener('keydown',e=>{
-  if(S.tab!=='tonight'||$('.sheet')||$('#pitch').classList.contains('show')||e.target.closest('input')) return;
+  if(S.tab!=='tonight'||$('.sheet')||$('#onb')||$('#pitch').classList.contains('show')||e.target.closest('input')) return;
   if(e.key==='ArrowRight') decide(true); else if(e.key==='ArrowLeft') decide(false);
 });
 
